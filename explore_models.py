@@ -41,7 +41,7 @@ def load_model(model : str, tokenizer: str, revision = None, token=None ):
     num_params = calc_num_params(model)
     print("\nModel parameters: %s (%s)"%(sizeof_fmt(num_params, suffix=""),
         num_params))
-    print("<<<<<<<<<<  MODEL LOADED <<<<<<<<<<<<<<\n")
+    print("<<<<<<<<<<  MODEL LOADED <<<<<<<<<<<<<<<\n")
     return model, tokenizer 
 # ====================================================================|=======:
 def sizeof_fmt(num, suffix="B"):
@@ -104,13 +104,14 @@ def __handle_cli_args():
     parser.add_argument("--debug",action="store_true") 
     parser.add_argument("--token",type=str,default=None)
     # TODO: Here is where you would handle token settings.
+    # TODO: need to be able to handle users passing in model and tokenizer
     args = parser.parse_args()
     return args
 # ====================================================================|=======:
 if __name__ == "__main__": 
     args = __handle_cli_args()
-    global Model, Tokenizer, Token 
     if sys.flags.interactive: 
+        # TODO: Need to consider args.model & args.tokenizer...
         Model, Tokenizer, Token = __interactive_mode(token = args.token)
         print_objs_in_mem()
-        print("\n\n Now entering Python Interactive Mode. To exit type 'quit()'")
+        print("\n\nNow entering Python Interactive Mode - exit via 'quit()'")
