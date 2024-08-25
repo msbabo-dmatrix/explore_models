@@ -116,7 +116,7 @@ def __handle_cli_args():
 
 if __name__ == "__main__": 
     args = __handle_cli_args()
-
+    global Model, Tokenizer, Token 
     if sys.flags.interactive: 
         Model, Tokenizer, Token = __interactive_mode(token = args.token)
         print_objs_in_mem()
