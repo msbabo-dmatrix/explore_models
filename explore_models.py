@@ -34,7 +34,6 @@ def load_model(model : str, tokenizer: str, revision = None, token=None ):
             revision  = revision, 
             token = token, 
             trust_remote_code=True)
-
     model = AutoModelForCausalLM.from_pretrained(model, 
             token = token,
             revision  = revision, 
@@ -44,7 +43,6 @@ def load_model(model : str, tokenizer: str, revision = None, token=None ):
         num_params))
     print("<<<<<<<<<<  MODEL LOADED <<<<<<<<<<<<<<\n")
     return model, tokenizer 
-
 # ====================================================================|=======:
 def sizeof_fmt(num, suffix="B"):
     for unit in ("", "K", "M", "G", "T", "Pi", "Ei", "Zi"):
@@ -53,9 +51,6 @@ def sizeof_fmt(num, suffix="B"):
         #num /= 1024.0
         num /= 1000.0
     return f"{num:.1f}Yi{suffix}"
-
-
-
 # ====================================================================|=======:
 # Note, this function is the core method. Therefore, any state setting
 # should be managed here (asuming interative_mode execution).
@@ -96,12 +91,10 @@ def help():
     print("(typicaly) objects in memory: ")
 # ====================================================================|=======:
 def print_objs_in_mem(): 
-    global OBJS_IN_MEM
-
+    global OBJS_IN_MEM, Model, Tokenizer, Token
     OBJS_IN_MEM["Model"] = Model
     OBJS_IN_MEM["Tokenizer"] = Tokenizer
     OBJS_IN_MEM["Token"] = Token
-
     print("Objects in memory: ")
     for k,v in OBJS_IN_MEM.items(): 
         print(" > %-10s : {type=%s}"%(k,type(v)))
@@ -113,7 +106,7 @@ def __handle_cli_args():
     # TODO: Here is where you would handle token settings.
     args = parser.parse_args()
     return args
-
+# ====================================================================|=======:
 if __name__ == "__main__": 
     args = __handle_cli_args()
     global Model, Tokenizer, Token 
