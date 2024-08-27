@@ -48,7 +48,7 @@ def load_model(model : str, tokenizer: str, revision = None, token=None ):
     print("\nModel parameters: %s (%s)"%(sizeof_fmt(num_params, suffix=""),
         num_params))
     print("<<<<<<<<<<  MODEL LOADED <<<<<<<<<<<<<<<\n")
-    return model, tokenizer 
+    return model, tokenizer, token 
 # ====================================================================|=======:
 def sizeof_fmt(num, suffix="B"):
     for unit in ("", "K", "M", "G", "T", "Pi", "Ei", "Zi"):
@@ -78,7 +78,7 @@ def __interactive_mode(token = None):
     model_dict = MODELS[model_name]
     # ----------------------------------------------------------------|--END--:
     if token: model_dict['token'] = token 
-    model, tokenizer = load_model(model=model_dict["model"], 
+    model, tokenizer, token = load_model(model=model_dict["model"], 
                        tokenizer = model_dict["tokenizer"],
                        token = model_dict.get("token", None), 
                        revision = model_dict.get("revision", None))
@@ -111,13 +111,28 @@ def __handle_cli_args():
     parser.add_argument("--token",type=str,default=None)
     # TODO: Here is where you would handle token settings.
     # TODO: need to be able to handle users passing in model and tokenizer
+    parser.add_argument("--model",type=str,default=None)
+    parser.add_argument("--tokenizer",type=str,default=None)
+    parser.add_argument("--revision",type=str,default=None)
     args = parser.parse_args()
+    # Sanity Checks
+    if args.model and not args.tokenizer: 
+        print("Warning - no tokenizer provided. Setting tokenizer to model")
+        args.tokenizer = args.model
     return args
 # ====================================================================|=======:
 if __name__ == "__main__": 
     args = __handle_cli_args()
     if sys.flags.interactive: 
-        # TODO: Need to consider args.model & args.tokenizer...
-        Model, Tokenizer, Token = __interactive_mode(token = args.token)
+        if not args.model: 
+            Model, Tokenizer, Token = __interactive_mode(token = args.token)
+        elif args.model: 
+            Model, Tokenizer, Token = load_model(model=args.model, 
+                       tokenizer = args.model,
+                       token = args.token, 
+                       revision = args.revision)
+        else: 
+            raise RuntimeError("Something went wrong.")
+
         print_objs_in_mem()
         print("\n\nNow entering Python Interactive Mode - exit via 'quit()'")
