@@ -1,4 +1,5 @@
 # ====================================================================|=======:
+import os 
 import sys 
 import argparse
 import readline
@@ -6,6 +7,11 @@ from collections import OrderedDict
 import torch 
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from models import MODELS
+
+sol = None 
+if os.path.exists("sol_utils.py"): 
+    import sol_utils as sol 
+
 # ====================================================================|=======:
 # MODELS[<new model>] = {"model":..., "tokenizer":...}
 # ====================================================================|=======:
