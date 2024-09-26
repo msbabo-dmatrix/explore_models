@@ -1,6 +1,7 @@
 # ====================================================================|=======:
 import os 
 import sys 
+import re
 import argparse
 import readline
 from collections import OrderedDict
@@ -35,7 +36,8 @@ def load_model(model : str, tokenizer: str, revision = None, token=None ):
     print("model-name      : %s"%(model))
     print("model-tokenizer : %s"%(tokenizer))
     print("model-revision  : %s"%(revision))
-    print("model-token     : %s"%(token))
+    if token: 
+        print("model-token     : %s"%(token[:5] + "****"))
     tokenizer = AutoTokenizer.from_pretrained(tokenizer, 
             revision  = revision, 
             token = token, 
@@ -105,10 +107,24 @@ def print_objs_in_mem():
     for k,v in OBJS_IN_MEM.items(): 
         print(" > %-10s : {type=%s}"%(k,type(v)))
 # ====================================================================|=======:
+def _extract_token(key): 
+    token = None 
+    with open(".hf_tokens","r") as fh: 
+        for line in fh.readlines(): 
+            print(line)
+            m = re.search("^%s:\s*(?P<token>[\w]+)"%(key), line)
+            if m: 
+                token = m.group("token")
+                break
+    if not token: 
+        print(f"Warning - no token found for key: {key}")
+    return token
+# ====================================================================|=======:
 def __handle_cli_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug",action="store_true") 
     parser.add_argument("--token",type=str,default=None)
+    parser.add_argument("--token-read",type=str,default=None)
     # TODO: Here is where you would handle token settings.
     # TODO: need to be able to handle users passing in model and tokenizer
     parser.add_argument("--model",type=str,default=None)
@@ -119,6 +135,9 @@ def __handle_cli_args():
     if args.model and not args.tokenizer: 
         print("Warning - no tokenizer provided. Setting tokenizer to model")
         args.tokenizer = args.model
+
+    if args.token_read: 
+        args.token = _extract_token(args.token_read)
     return args
 # ====================================================================|=======:
 if __name__ == "__main__": 
