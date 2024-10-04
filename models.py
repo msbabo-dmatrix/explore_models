@@ -3,6 +3,10 @@ MODELS = {
             "model": "meta-llama/Meta-Llama-3.1-8B", 
             "tokenizer": "meta-llama/Meta-Llama-3.1-8B", 
         },  
+        "TinyLlama 1.1B" : {
+            "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+            "tokenizer": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        },
         "Gemma-2B  (google)" : { 
             "model": "google/gemma-2b", 
             "tokenizer": "google/gemma-2b", 
