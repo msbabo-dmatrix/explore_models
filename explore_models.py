@@ -2,6 +2,7 @@
 import os 
 import sys 
 import re
+import inspect
 import argparse
 import readline
 from collections import OrderedDict
@@ -12,6 +13,14 @@ from models import MODELS
 sol = None 
 if os.path.exists("sol_utils.py"): 
     import sol_utils as sol 
+
+
+def get_sig(function): 
+    """
+    The Signature object represents the call signature of a callable 
+    object and its return annotation
+    """
+    return inspect.signature(function)
 
 # ====================================================================|=======:
 # MODELS[<new model>] = {"model":..., "tokenizer":...}
