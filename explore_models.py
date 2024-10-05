@@ -22,6 +22,20 @@ def get_sig(function):
     """
     return inspect.signature(function)
 
+def kv_cache_per_token(model): 
+    _16s = ["torch.float16"]
+
+    if str(model.config.torch_dtype) in _16s: 
+        num_bits = 16
+    else: 
+        raise RuntimeError("missed dtype extraction")
+    
+    hidden_size = model.config.hidden_size
+    layers = model.config.num_hidden_layers
+
+    result = 2 * hidden_size * layers * num_bits
+    return result
+
 # ====================================================================|=======:
 # MODELS[<new model>] = {"model":..., "tokenizer":...}
 # ====================================================================|=======:
