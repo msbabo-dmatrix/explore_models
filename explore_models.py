@@ -13,22 +13,22 @@ from models import MODELS
 sol = None 
 if os.path.exists("sol_utils.py"): 
     import sol_utils as sol 
-
-
+# ====================================================================|=======:
 def sizeof_fmt(num, suffix="B"):
-    for unit in ("", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"):
+    for unit in ("", "K", "M", "G", "T", "Pi", "Ei", "Zi"):
         if abs(num) < 1024.0:
             return f"{num:3.1f}{unit}{suffix}"
-        num /= 1024.0
+        #num /= 1024.0
+        num /= 1000.0
     return f"{num:.1f}Yi{suffix}"
-
+# ====================================================================|=======:
 def get_sig(function): 
     """
     The Signature object represents the call signature of a callable 
     object and its return annotation
     """
     return inspect.signature(function)
-
+# ====================================================================|=======:
 def kv_cache_per_token(model, as_str = True): 
     _16s = ["torch.float16"]
     if str(model.config.torch_dtype) in _16s: 
@@ -40,7 +40,7 @@ def kv_cache_per_token(model, as_str = True):
     result = 2 * hidden_size * layers * num_bytes
     if as_str: return sizeof_fmt(result)
     return result
-
+# ====================================================================|=======:
 def kv_cache_for_max_context_length(model, as_str = True):
     max_cl = model.config.max_position_embeddings
     result = max_cl * kv_cache_per_token(model, False)
@@ -85,13 +85,6 @@ def load_model(model : str, tokenizer: str, revision = None, token=None ):
     print("<<<<<<<<<<  MODEL LOADED <<<<<<<<<<<<<<<\n")
     return model, tokenizer, token 
 # ====================================================================|=======:
-def sizeof_fmt(num, suffix="B"):
-    for unit in ("", "K", "M", "G", "T", "Pi", "Ei", "Zi"):
-        if abs(num) < 1024.0:
-            return f"{num:3.1f}{unit}{suffix}"
-        #num /= 1024.0
-        num /= 1000.0
-    return f"{num:.1f}Yi{suffix}"
 # ====================================================================|=======:
 # Note, this function is the core method. Therefore, any state setting
 # should be managed here (asuming interative_mode execution).
