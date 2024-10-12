@@ -1,7 +1,7 @@
 MODELS = {                                                                                                                     
         "Llama-3.1-8B (meta)" : { 
-            "model": "meta-llama/Meta-Llama-3.1-8B", 
-            "tokenizer": "meta-llama/Meta-Llama-3.1-8B", 
+            "model": "meta-llama/Llama-3.1-8B", 
+            "tokenizer": "meta-llama/Llama-3.1-8B", 
         },  
         "TinyLlama 1.1B" : {
             "model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",

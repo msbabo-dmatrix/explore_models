@@ -30,7 +30,7 @@ def get_sig(function):
     return inspect.signature(function)
 # ====================================================================|=======:
 def kv_cache_per_token(model, as_str = True): 
-    _16s = ["torch.float16"]
+    _16s = ["torch.float16", "torch.bfloat16"]
     if str(model.config.torch_dtype) in _16s: 
         num_bytes = 2
     else: 
@@ -74,9 +74,11 @@ def load_model(model : str, tokenizer: str, revision = None, token=None ):
     tokenizer = AutoTokenizer.from_pretrained(tokenizer, 
             revision  = revision, 
             token = token, 
+            device_map = "auto",
             trust_remote_code=True)
     model = AutoModelForCausalLM.from_pretrained(model, 
             token = token,
+            device_map = "auto",
             revision  = revision, 
             trust_remote_code=True)
     num_params = calc_num_params(model)
