@@ -7,7 +7,7 @@ import argparse
 import readline
 from collections import OrderedDict
 import torch 
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM
 from models import MODELS
 
 sol = None 
@@ -28,6 +28,45 @@ def get_sig(function):
     object and its return annotation
     """
     return inspect.signature(function)
+# ====================================================================|=======:
+def calc_max_kv_cache(model, batch_size = 1, seq_length = None, num_bytes=None): 
+    func = "calc_max_kv_cache"
+    _16s = ["torch.float16", "torch.bfloat16"]
+
+    print(f"DEBUG [{func}]: type(model) = {type(model)}")
+
+    #if isinstance(model,AutoConfig): 
+    #if "PretrainedConfig" in model.__class__.__bases__: 
+    if "Config" in str(model.__class__): 
+        dHead   = (model.hidden_size / model.num_attention_heads)
+        kvHeads = (model.num_key_value_heads)
+        layers  = (model.num_hidden_layers)
+        seqlen  = (model.max_position_embeddings)
+        prec    = (model.torch_dtype)
+    else: 
+        dHead   = (model.config.hidden_size / model.config.num_attention_heads)
+        kvHeads = (model.config.num_key_value_head)
+        layers  = (model.config.num_hidden_layers)
+        seqlen  = (model.config.max_position_embeddings)
+
+    if seq_length == None: 
+        seq_length = seqlen 
+
+    if num_bytes == None: 
+        if str(prec) not in _16s: 
+            raise RuntimeError("missed dtype extraction")
+        num_bytes = 2
+
+    print(f"DEBUG [{func}]: batch_size = {batch_size}")
+    print(f"DEBUG [{func}]: seq_length = {seq_length}")
+    print(f"DEBUG [{func}]: dHead      = {dHead}")
+    print(f"DEBUG [{func}]: kvHeads    = {kvHeads}")
+    print(f"DEBUG [{func}]: layers     = {layers}")
+    print(f"DEBUG [{func}]: num_bytes  = {num_bytes}")
+
+    result = 2 *(batch_size) * (seq_length) * dHead * kvHeads * layers * num_bytes
+    return result
+
 # ====================================================================|=======:
 def kv_cache_per_token(model, as_str = True): 
     _16s = ["torch.float16", "torch.bfloat16"]
@@ -64,7 +103,14 @@ OBJS_IN_MEM = {
     "Token" : None, # TODO: Need a way to hide the token. 
 }
 # ====================================================================|=======:
-def load_model(model : str, tokenizer: str, revision = None, token=None ): 
+def load_model(model : str, tokenizer: str, revision = None, token=None ,
+        no_weights = False): 
+    if no_weights: 
+        print("\n\n>>>>>>>>>>  LOADING CONFIG >>>>>>>>>>>>>>")
+        config = AutoConfig.from_pretrained(model)
+        print("<<<<<<<<<<  CONFIG LOADED <<<<<<<<<<<<<<<\n")
+        return config, None, token
+
     print("\n\n>>>>>>>>>>  LOADING MODEL >>>>>>>>>>>>>>")
     print("model-name      : %s"%(model))
     print("model-tokenizer : %s"%(tokenizer))
@@ -90,7 +136,7 @@ def load_model(model : str, tokenizer: str, revision = None, token=None ):
 # ====================================================================|=======:
 # Note, this function is the core method. Therefore, any state setting
 # should be managed here (asuming interative_mode execution).
-def __interactive_mode(token = None): 
+def __interactive_mode(token = None, no_weights = False): 
     print("\n\n=====================================================:")
     print(    "                EXPLORE MODELS ") 
     print(    "=====================================================:")
@@ -111,7 +157,8 @@ def __interactive_mode(token = None):
     model, tokenizer, token = load_model(model=model_dict["model"], 
                        tokenizer = model_dict["tokenizer"],
                        token = model_dict.get("token", None), 
-                       revision = model_dict.get("revision", None))
+                       revision = model_dict.get("revision", None),
+                       no_weights = no_weights)
     return model, tokenizer , token 
 # ====================================================================|=======:
 def rerun(token=None): 
@@ -153,6 +200,8 @@ def __handle_cli_args():
     parser.add_argument("--debug",action="store_true") 
     parser.add_argument("--token",type=str,default=None)
     parser.add_argument("--token-read",type=str,default=None)
+    parser.add_argument("--no-weights",action="store_true")
+
     # TODO: Here is where you would handle token settings.
     # TODO: need to be able to handle users passing in model and tokenizer
     parser.add_argument("--model",type=str,default=None)
@@ -172,12 +221,14 @@ if __name__ == "__main__":
     args = __handle_cli_args()
     if sys.flags.interactive: 
         if not args.model: 
-            Model, Tokenizer, Token = __interactive_mode(token = args.token)
+            Model, Tokenizer, Token = __interactive_mode(token = args.token, 
+                    no_weights = args.no_weights)
         elif args.model: 
             Model, Tokenizer, Token = load_model(model=args.model, 
                        tokenizer = args.model,
                        token = args.token, 
-                       revision = args.revision)
+                       revision = args.revision, 
+                    no_weights = args.no_weights)
         else: 
             raise RuntimeError("Something went wrong.")
 
