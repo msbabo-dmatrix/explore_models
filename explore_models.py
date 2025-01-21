@@ -117,21 +117,40 @@ def load_model(model : str, tokenizer: str, revision = None, token=None ,
     print("model-revision  : %s"%(revision))
     if token: 
         print("model-token     : %s"%(token[:5] + "****"))
-    tokenizer = AutoTokenizer.from_pretrained(tokenizer, 
+
+
+    # Need a hook for 'special models' meaning we need to load them 
+    # NOT fomr Auto* classes: 
+    is_special_model = False 
+    if "clip" in model: 
+        from transformers import CLIPProcessor, CLIPModel
+        _model = model 
+        model = CLIPModel.from_pretrained(_model)# .cuda() # TODO 
+        processor = CLIPProcessor.from_pretrained(_model)
+        is_special_model = True
+
+    # elif other cases
+    else: 
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer, 
             revision  = revision, 
             token = token, 
             device_map = "auto",
             trust_remote_code=True)
-    model = AutoModelForCausalLM.from_pretrained(model, 
+        model = AutoModelForCausalLM.from_pretrained(model, 
             token = token,
             device_map = "auto",
             revision  = revision, 
             trust_remote_code=True)
+
     num_params = calc_num_params(model)
     print("\nModel parameters: %s (%s)"%(sizeof_fmt(num_params, suffix=""),
         num_params))
     print("<<<<<<<<<<  MODEL LOADED <<<<<<<<<<<<<<<\n")
-    return model, tokenizer, token 
+
+    if is_special_model: 
+        return model, processor, token 
+    else: 
+        return model, tokenizer, token 
 # ====================================================================|=======:
 # ====================================================================|=======:
 # Note, this function is the core method. Therefore, any state setting

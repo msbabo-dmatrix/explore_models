@@ -1,3 +1,4 @@
+accelerate==1.0.1
 certifi==2024.7.4
 charset-normalizer==3.3.2
 filelock==3.15.4
@@ -24,7 +25,9 @@ nvidia-nvjitlink-cu12==12.6.20
 nvidia-nvtx-cu12==12.1.105
 packaging==24.1
 pfzy==0.3.4
+pillow==11.1.0
 prompt_toolkit==3.0.47
+psutil==6.1.0
 PyYAML==6.0.2
 regex==2024.7.24
 requests==2.32.3
